@@ -29,8 +29,8 @@ You can view a live demo over at https://react-redux.realworld.io/
 
 ```bash
 # Clone the main repository containing both frontend and backend
-git clone https://github.com/PECATHON/01_Onera.gi.git
-cd 01_Onera.gi
+git clone https://github.com/PECATHON/01_Onera.git
+cd 01_Onera
 ```
 
 #### 2. Setup Backend Server
