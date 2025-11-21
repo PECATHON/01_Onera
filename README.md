@@ -6,17 +6,9 @@ Full-stack blogging platform built with React + Redux (frontend) and Node.js + E
 
 ```
 01_Onera/
-├── frontend/                 # React + Redux application
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── README.md
-├── backend/                  # Node.js + Express + Prisma API
-│   ├── src/
-│   ├── prisma/
-│   ├── package.json
-│   └── README.md
-└── README.md
+├── frontend/          React + Redux application
+├── backend/           Node.js + Express + Prisma API
+└── README.md          Setup guide
 ```
 
 ## 🚀 Quick Start
@@ -25,7 +17,7 @@ Full-stack blogging platform built with React + Redux (frontend) and Node.js + E
 - Node.js v14+
 - npm or yarn
 
-### Setup Backend
+### Backend Setup
 
 ```bash
 cd backend
@@ -38,9 +30,9 @@ npx prisma migrate deploy
 npm start
 ```
 
-Backend runs on `http://localhost:3000/api`
+Runs on http://localhost:3000/api
 
-### Setup Frontend
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -48,7 +40,7 @@ npm install
 npm start
 ```
 
-Frontend runs on `http://localhost:4100`
+Runs on http://localhost:4100
 
 ## ✨ Features Implemented
 
