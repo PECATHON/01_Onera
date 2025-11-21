@@ -10,6 +10,7 @@ import Home from '../components/Home';
 import Login from '../components/Login';
 import Profile from '../components/Profile';
 import ProfileFavorites from '../components/ProfileFavorites';
+import ProfileComments from '../components/ProfileComments';
 import ReadingList from '../components/ReadingList';
 import Register from '../components/Register';
 import Settings from '../components/Settings';
@@ -65,6 +66,7 @@ class App extends React.Component {
             <Route path="/reading-list" component={ReadingList} />
             <Route path="/settings" component={Settings} />
             <Route path="/@:username/favorites" component={ProfileFavorites} />
+            <Route path="/@:username/comments" component={ProfileComments} />
             <Route path="/@:username" component={Profile} />
             </Switch>
 

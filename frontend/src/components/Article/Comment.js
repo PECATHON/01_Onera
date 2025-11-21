@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import UserAvatar from '../UserAvatar';
 import agent from '../../agent';
+import { COMMENT_UPVOTED, COMMENT_DOWNVOTED } from '../../constants/actionTypes';
 
-const Comment = ({ comment, currentUser, slug, onReply }) => {
+const Comment = ({ comment, currentUser, slug, onReply, onUpvote, onDownvote }) => {
   const [showReplies, setShowReplies] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
 
@@ -11,12 +13,10 @@ const Comment = ({ comment, currentUser, slug, onReply }) => {
     setIsVoting(true);
     try {
       if (value === 1) {
-        await agent.Comments.upvote(comment.id);
+        onUpvote(comment.id);
       } else {
-        await agent.Comments.downvote(comment.id);
+        onDownvote(comment.id);
       }
-      // Refresh the page to show updated vote counts
-      window.location.reload();
     } catch (err) {
       console.error('Error voting:', err);
     } finally {
@@ -99,6 +99,8 @@ const Comment = ({ comment, currentUser, slug, onReply }) => {
                   currentUser={currentUser}
                   slug={slug}
                   onReply={onReply}
+                  onUpvote={onUpvote}
+                  onDownvote={onDownvote}
                 />
               ))}
             </div>
@@ -292,4 +294,17 @@ const Comment = ({ comment, currentUser, slug, onReply }) => {
   );
 };
 
-export default Comment;
+const mapDispatchToProps = dispatch => ({
+  onUpvote: commentId => dispatch({
+    type: COMMENT_UPVOTED,
+    commentId,
+    payload: agent.Comments.upvote(commentId)
+  }),
+  onDownvote: commentId => dispatch({
+    type: COMMENT_DOWNVOTED,
+    commentId,
+    payload: agent.Comments.downvote(commentId)
+  })
+});
+
+export default connect(() => ({}), mapDispatchToProps)(Comment);

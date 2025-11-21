@@ -64,7 +64,7 @@ class BookmarkButton extends React.Component {
         onClick={this.handleClick}
         disabled={isLoading}>
         <i className="ion-bookmark"></i>
-        {isLoading ? '...' : (article.bookmarked ? 'Bookmarked' : 'Bookmark')}
+        {isLoading ? '...' : (article.bookmarked ? 'Unbookmark' : 'Bookmark')}
       </button>
     );
   }

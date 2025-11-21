@@ -96,11 +96,11 @@ const ArticlePreview = props => {
 
       <div className="article-bottom-section">
         <div className="article-author-section">
-          <Link to={`/@${article.author.username}`} className="author-avatar-link">
+          <Link to={`/@${encodeURIComponent(article.author.username)}`} className="author-avatar-link">
             <UserAvatar username={article.author.username} image={article.author.image} size="md" />
           </Link>
           <div className="author-info">
-            <Link className="author-name" to={`/@${article.author.username}`}>
+            <Link className="author-name" to={`/@${encodeURIComponent(article.author.username)}`}>
               {article.author.username}
             </Link>
             <span className="article-date">

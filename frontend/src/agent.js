@@ -148,7 +148,41 @@ const Profile = {
   unblock: username =>
     requests.del(`/profiles/${username}/block`),
   getAllUsers: () =>
-    requests.get('/profiles')
+    requests.get('/profiles'),
+  getComments: username => {
+    // Workaround: Get recent articles and fetch comments from all of them
+    return requests.get(`/articles?limit=50`)
+      .then(articlesResponse => {
+        if (!articlesResponse.articles || articlesResponse.articles.length === 0) {
+          return { comments: [] };
+        }
+        
+        // Get comments from all recent articles and filter by username
+        const commentPromises = articlesResponse.articles.map(article => 
+          requests.get(`/articles/${article.slug}/comments`)
+            .then(commentsResponse => 
+              (commentsResponse.comments || []).filter(comment => 
+                comment.author.username === username
+              ).map(comment => ({
+                ...comment,
+                article: {
+                  slug: article.slug,
+                  title: article.title
+                }
+              }))
+            )
+            .catch(() => [])
+        );
+        
+        return Promise.all(commentPromises)
+          .then(commentArrays => {
+            const allComments = commentArrays.flat()
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            return { comments: allComments };
+          });
+      })
+      .catch(() => ({ comments: [] }));
+  }
 };
 
 const Notifications = {
