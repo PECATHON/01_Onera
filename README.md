@@ -121,7 +121,7 @@ cd 01_Onera
 #### 2. Setup Backend Server
 
 ```bash
-# Navigate to backend directory
+# Navigate to backend directory (Node.js + Express + Prisma)
 cd node-express-realworld-example-app
 
 # Install dependencies
@@ -148,7 +148,7 @@ npm start
 #### 3. Setup Frontend Application
 
 ```bash
-# Navigate to frontend directory (in a new terminal)
+# Navigate to frontend directory (React + Redux) - in a new terminal
 cd react-redux-realworld-example-app
 
 # Install dependencies
@@ -172,7 +172,7 @@ npm start
 To run just the frontend with the live API:
 
 ```bash
-# From the main repository root
+# From the main repository root - navigate to frontend
 cd react-redux-realworld-example-app
 npm install
 npm start
