@@ -63,6 +63,17 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
     });
   }
 
+  if ('search' in query && query.search) {
+    queries.push({
+      OR: [
+        { title: { contains: query.search } },
+        { description: { contains: query.search } },
+        { body: { contains: query.search } },
+        { author: { username: { contains: query.search } } },
+      ],
+    });
+  }
+
   return queries;
 };
 
@@ -96,6 +107,7 @@ export const getArticles = async (query: any, id?: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -145,6 +157,7 @@ export const getFeed = async (offset: number, limit: number, id: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -227,6 +240,7 @@ export const createArticle = async (article: any, id: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -258,6 +272,7 @@ export const getArticle = async (slug: string, id?: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -371,6 +386,7 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -413,23 +429,24 @@ export const deleteArticle = async (slug: string, id: number) => {
   });
 };
 
+const formatComment = (comment: any, userId?: number): any => ({
+  id: comment.id,
+  createdAt: comment.createdAt,
+  updatedAt: comment.updatedAt,
+  body: comment.body,
+  author: {
+    username: comment.author.username,
+    bio: comment.author.bio,
+    image: comment.author.image,
+    following: comment.author.followedBy.some((follow: any) => follow.id === userId),
+  },
+  upvotes: comment.votes.filter((v: any) => v.value === 1).length,
+  downvotes: comment.votes.filter((v: any) => v.value === -1).length,
+  userVote: comment.votes.find((v: any) => v.userId === userId)?.value || 0,
+  replies: comment.replies ? comment.replies.map((r: any) => formatComment(r, userId)) : [],
+});
+
 export const getCommentsByArticle = async (slug: string, id?: number) => {
-  const queries = [];
-
-  queries.push({
-    author: {
-      demo: true,
-    },
-  });
-
-  if (id) {
-    queries.push({
-      author: {
-        id,
-      },
-    });
-  }
-
   const comments = await prisma.article.findUnique({
     where: {
       slug,
@@ -437,13 +454,9 @@ export const getCommentsByArticle = async (slug: string, id?: number) => {
     include: {
       comments: {
         where: {
-          OR: queries,
+          parentCommentId: null,
         },
-        select: {
-          id: true,
-          createdAt: true,
-          updatedAt: true,
-          body: true,
+        include: {
           author: {
             select: {
               username: true,
@@ -452,25 +465,40 @@ export const getCommentsByArticle = async (slug: string, id?: number) => {
               followedBy: true,
             },
           },
+          votes: true,
+          replies: {
+            include: {
+              author: {
+                select: {
+                  username: true,
+                  bio: true,
+                  image: true,
+                  followedBy: true,
+                },
+              },
+              votes: true,
+            },
+          },
         },
       },
     },
   });
 
-  const result = comments?.comments.map((comment: any) => ({
-    ...comment,
-    author: {
-      username: comment.author.username,
-      bio: comment.author.bio,
-      image: comment.author.image,
-      following: comment.author.followedBy.some((follow: any) => follow.id === id),
-    },
-  }));
-
+  const result = comments?.comments.map((comment: any) => formatComment(comment, id));
   return result;
 };
 
-export const addComment = async (body: string, slug: string, id: number) => {
+const extractMentions = (text: string): string[] => {
+  const mentionRegex = /@(\w+)/g;
+  const mentions: string[] = [];
+  let match;
+  while ((match = mentionRegex.exec(text)) !== null) {
+    mentions.push(match[1]);
+  }
+  return [...new Set(mentions)];
+};
+
+export const addComment = async (body: string, slug: string, id: number, parentCommentId?: number) => {
   if (!body) {
     throw new HttpException(422, { errors: { body: ["can't be blank"] } });
   }
@@ -497,6 +525,13 @@ export const addComment = async (body: string, slug: string, id: number) => {
           id: id,
         },
       },
+      ...(parentCommentId && {
+        parentComment: {
+          connect: {
+            id: parentCommentId,
+          },
+        },
+      }),
     },
     include: {
       author: {
@@ -507,8 +542,48 @@ export const addComment = async (body: string, slug: string, id: number) => {
           followedBy: true,
         },
       },
+      votes: true,
     },
   });
+
+  const mentions = extractMentions(body);
+  if (mentions.length > 0) {
+    const mentionedUsers = await prisma.user.findMany({
+      where: {
+        username: {
+          in: mentions,
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    for (const user of mentionedUsers) {
+      await prisma.notification.create({
+        data: {
+          type: 'mention',
+          message: `@${comment.author.username} mentioned you in a comment`,
+          user: {
+            connect: {
+              id: user.id,
+            },
+          },
+          fromUser: {
+            connect: {
+              id: id,
+            },
+          },
+          comment: {
+            connect: {
+              id: comment.id,
+            },
+          },
+        },
+      });
+    }
+  }
 
   return {
     id: comment.id,
@@ -521,6 +596,10 @@ export const addComment = async (body: string, slug: string, id: number) => {
       image: comment.author.image,
       following: comment.author.followedBy.some((follow: any) => follow.id === id),
     },
+    upvotes: comment.votes.filter((v: any) => v.value === 1).length,
+    downvotes: comment.votes.filter((v: any) => v.value === -1).length,
+    userVote: comment.votes.find((v: any) => v.userId === id)?.value || 0,
+    replies: [],
   };
 };
 
@@ -586,6 +665,7 @@ export const favoriteArticle = async (slugPayload: string, id: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -600,6 +680,7 @@ export const favoriteArticle = async (slugPayload: string, id: number) => {
     tagList: article?.tagList.map((tag: Tag) => tag.name),
     favorited: article.favoritedBy.some((favorited: any) => favorited.id === id),
     favoritesCount: _count?.favoritedBy,
+    bookmarked: article.bookmarks ? article.bookmarks.some((bookmark: any) => bookmark.userId === id) : false,
   };
 
   return result;
@@ -632,6 +713,7 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
         },
       },
       favoritedBy: true,
+      bookmarks: true,
       _count: {
         select: {
           favoritedBy: true,
@@ -646,6 +728,7 @@ export const unfavoriteArticle = async (slugPayload: string, id: number) => {
     tagList: article?.tagList.map((tag: Tag) => tag.name),
     favorited: article.favoritedBy.some((favorited: any) => favorited.id === id),
     favoritesCount: _count?.favoritedBy,
+    bookmarked: article.bookmarks ? article.bookmarks.some((bookmark: any) => bookmark.userId === id) : false,
   };
 
   return result;

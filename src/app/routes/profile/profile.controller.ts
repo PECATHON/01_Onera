@@ -1,8 +1,36 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import auth from '../auth/auth';
+import prisma from '../../../prisma/prisma-client';
 import { followUser, getProfile, unfollowUser } from './profile.service';
 
 const router = Router();
+
+/**
+ * Get all users
+ * @auth optional
+ * @route {GET} /profiles
+ * @returns users
+ */
+router.get(
+  '/profiles',
+  auth.optional,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          username: true,
+          image: true,
+          bio: true,
+        },
+        take: 100,
+      });
+      res.json({ users });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 /**
  * Get profile
