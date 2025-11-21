@@ -1,6 +1,7 @@
 import article from './reducers/article';
 import articleList from './reducers/articleList';
 import auth from './reducers/auth';
+import bookmarks from './reducers/bookmarks';
 import { combineReducers } from 'redux';
 import common from './reducers/common';
 import editor from './reducers/editor';
@@ -13,6 +14,7 @@ export default combineReducers({
   article,
   articleList,
   auth,
+  bookmarks,
   common,
   editor,
   home,

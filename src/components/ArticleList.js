@@ -1,12 +1,11 @@
 import ArticlePreview from './ArticlePreview';
 import ListPagination from './ListPagination';
+import SkeletonLoader from './SkeletonLoader';
 import React from 'react';
 
 const ArticleList = props => {
   if (!props.articles) {
-    return (
-      <div className="article-preview">Loading...</div>
-    );
+    return <SkeletonLoader />;
   }
 
   if (props.articles.length === 0) {
@@ -18,11 +17,13 @@ const ArticleList = props => {
   }
 
   return (
-    <div>
+    <div style={{ marginLeft: '-1.5rem', marginRight: '-1.5rem' }}>
       {
         props.articles.map(article => {
           return (
-            <ArticlePreview article={article} key={article.slug} />
+            <div key={article.slug} style={{ paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
+              <ArticlePreview article={article} />
+            </div>
           );
         })
       }

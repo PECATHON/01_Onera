@@ -9,6 +9,7 @@ import {
   PROFILE_PAGE_LOADED,
   PROFILE_PAGE_UNLOADED
 } from '../constants/actionTypes';
+import UserAvatar from './UserAvatar';
 
 const EditProfileSettings = props => {
   if (props.isUser) {
@@ -125,17 +126,21 @@ class Profile extends React.Component {
             <div className="row">
               <div className="col-xs-12 col-md-10 offset-md-1">
 
-                <img src={profile.image} className="user-img" alt={profile.username} />
+                <div className="profile-avatar">
+                  <UserAvatar username={profile.username} image={profile.image} size="lg" />
+                </div>
                 <h4>{profile.username}</h4>
                 <p>{profile.bio}</p>
 
-                <EditProfileSettings isUser={isUser} />
-                <FollowUserButton
-                  isUser={isUser}
-                  user={profile}
-                  follow={this.props.onFollow}
-                  unfollow={this.props.onUnfollow}
-                  />
+                <div className="profile-actions">
+                  <EditProfileSettings isUser={isUser} />
+                  <FollowUserButton
+                    isUser={isUser}
+                    user={profile}
+                    follow={this.props.onFollow}
+                    unfollow={this.props.onUnfollow}
+                    />
+                </div>
 
               </div>
             </div>
@@ -160,6 +165,100 @@ class Profile extends React.Component {
 
           </div>
         </div>
+
+        <style>{`
+          .profile-page {
+            background: #f8f9fa;
+            min-height: 100vh;
+          }
+
+          .dark-theme .profile-page {
+            background: #0d0d0d;
+          }
+
+          .user-info {
+            background: white;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e1e4e8;
+          }
+
+          .dark-theme .user-info {
+            background: #1a1a1a;
+            border-bottom-color: #333;
+          }
+
+          .profile-avatar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+          }
+
+          .user-info h4 {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #373a3c;
+          }
+
+          .dark-theme .user-info h4 {
+            color: #e0e0e0;
+          }
+
+          .user-info p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 1.5rem;
+          }
+
+          .dark-theme .user-info p {
+            color: #aaa;
+          }
+
+          .profile-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+
+          .profile-actions .action-btn {
+            min-height: 44px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+          }
+
+          @media (max-width: 768px) {
+            .user-info {
+              padding: 1.5rem 0;
+            }
+
+            .profile-avatar {
+              margin-bottom: 1rem;
+            }
+
+            .user-info h4 {
+              font-size: 1.25rem;
+            }
+
+            .profile-actions {
+              gap: 0.5rem;
+            }
+
+            .profile-actions .action-btn {
+              flex: 1;
+              min-width: 120px;
+              padding: 0.65rem 1rem;
+              font-size: 0.85rem;
+            }
+
+            .col-md-10 {
+              width: 100% !important;
+              margin-left: 0 !important;
+              padding: 0 1rem;
+            }
+          }
+        `}</style>
 
       </div>
     );

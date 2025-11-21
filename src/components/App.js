@@ -10,6 +10,7 @@ import Home from '../components/Home';
 import Login from '../components/Login';
 import Profile from '../components/Profile';
 import ProfileFavorites from '../components/ProfileFavorites';
+import ReadingList from '../components/ReadingList';
 import Register from '../components/Register';
 import Settings from '../components/Settings';
 import { store } from '../store';
@@ -33,7 +34,6 @@ const mapDispatchToProps = dispatch => ({
 class App extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.redirectTo) {
-      // this.context.router.replace(nextProps.redirectTo);
       store.dispatch(push(nextProps.redirectTo));
       this.props.onRedirect();
     }
@@ -62,10 +62,88 @@ class App extends React.Component {
             <Route path="/editor/:slug" component={Editor} />
             <Route path="/editor" component={Editor} />
             <Route path="/article/:id" component={Article} />
+            <Route path="/reading-list" component={ReadingList} />
             <Route path="/settings" component={Settings} />
             <Route path="/@:username/favorites" component={ProfileFavorites} />
             <Route path="/@:username" component={Profile} />
             </Switch>
+
+          <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+            * {
+              font-family: 'Rajdhani', sans-serif;
+            }
+
+            .pagination {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 0.5rem;
+              justify-content: center;
+              padding: 1.5rem 0;
+              list-style: none;
+              margin: 0;
+            }
+
+            .page-item {
+              display: inline-block;
+            }
+
+            .page-link {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-width: 44px;
+              min-height: 44px;
+              padding: 0.5rem 0.75rem;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              color: #5cb85c;
+              text-decoration: none;
+              transition: all 0.2s;
+              font-weight: 500;
+            }
+
+            .page-link:hover {
+              background: #f0f8f0;
+              border-color: #5cb85c;
+            }
+
+            .page-item.active .page-link {
+              background: #5cb85c;
+              color: white;
+              border-color: #5cb85c;
+            }
+
+            .dark-theme .page-link {
+              border-color: #444;
+              color: #5cb85c;
+            }
+
+            .dark-theme .page-link:hover {
+              background: #1a2a1a;
+              border-color: #5cb85c;
+            }
+
+            .dark-theme .page-item.active .page-link {
+              background: #5cb85c;
+              color: white;
+              border-color: #5cb85c;
+            }
+
+            @media (max-width: 768px) {
+              .pagination {
+                gap: 0.25rem;
+              }
+
+              .page-link {
+                min-width: 40px;
+                min-height: 40px;
+                padding: 0.4rem 0.6rem;
+                font-size: 0.9rem;
+              }
+            }
+          `}</style>
         </div>
       );
     }
@@ -78,9 +156,5 @@ class App extends React.Component {
     );
   }
 }
-
-// App.contextTypes = {
-//   router: PropTypes.object.isRequired
-// };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

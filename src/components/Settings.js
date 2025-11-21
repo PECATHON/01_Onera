@@ -163,6 +163,125 @@ class Settings extends React.Component {
             </div>
           </div>
         </div>
+
+        <style>{`
+          .settings-page {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem 0;
+          }
+
+          .dark-theme .settings-page {
+            background: #0d0d0d;
+          }
+
+          .settings-page h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #373a3c;
+            font-size: 2rem;
+          }
+
+          .dark-theme .settings-page h1 {
+            color: #e0e0e0;
+          }
+
+          .settings-page .form-group {
+            margin-bottom: 1.5rem;
+          }
+
+          .settings-page .form-control {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            color: #373a3c;
+            background: white;
+            transition: border-color 0.2s;
+          }
+
+          .settings-page .form-control:focus {
+            border-color: #5cb85c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.1);
+          }
+
+          .dark-theme .settings-page .form-control {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border-color: #333;
+          }
+
+          .dark-theme .settings-page .form-control:focus {
+            border-color: #5cb85c;
+            box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.2);
+          }
+
+          .settings-page .form-control-lg {
+            font-size: 1.25rem;
+            padding: 0.85rem;
+          }
+
+          .settings-page textarea.form-control {
+            resize: vertical;
+            min-height: 150px;
+          }
+
+          .settings-page .btn {
+            min-height: 44px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+          }
+
+          .settings-page hr {
+            border-color: #e1e4e8;
+            margin: 2rem 0;
+          }
+
+          .dark-theme .settings-page hr {
+            border-color: #333;
+          }
+
+          @media (max-width: 768px) {
+            .settings-page {
+              padding: 1rem 0;
+            }
+
+            .col-md-6 {
+              width: 100% !important;
+              margin-left: 0 !important;
+              padding: 0 1rem;
+            }
+
+            .settings-page h1 {
+              font-size: 1.5rem;
+              margin-bottom: 1.5rem;
+            }
+
+            .settings-page .form-control {
+              font-size: 16px;
+              padding: 0.85rem;
+            }
+
+            .settings-page .form-control-lg {
+              font-size: 1rem;
+            }
+
+            .settings-page textarea.form-control {
+              min-height: 120px;
+            }
+
+            .settings-page .btn {
+              width: 100%;
+              margin-top: 1rem;
+            }
+
+            .pull-xs-right {
+              float: none !important;
+            }
+          }
+        `}</style>
+
       </div>
     );
   }

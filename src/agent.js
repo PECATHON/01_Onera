@@ -1,17 +1,20 @@
 import superagentPromise from 'superagent-promise';
 import _superagent from 'superagent';
+import { getTopTags } from './utils/readingHistory';
 
 const superagent = superagentPromise(_superagent, global.Promise);
 
-const API_ROOT = 'https://conduit.productionready.io/api';
+const API_ROOT = 'http://localhost:3000/api';
 
 const encode = encodeURIComponent;
 const responseBody = res => res.body;
 
 let token = null;
 const tokenPlugin = req => {
-  if (token) {
-    req.set('authorization', `Token ${token}`);
+  const storedToken = window.localStorage.getItem('jwt');
+  const actualToken = token || storedToken;
+  if (actualToken) {
+    req.set('authorization', `Token ${actualToken}`);
   }
 }
 
@@ -46,18 +49,60 @@ const omitSlug = article => Object.assign({}, article, { slug: undefined })
 const Articles = {
   all: page =>
     requests.get(`/articles?${limit(10, page)}`),
+  feed: page =>
+    requests.get(`/articles/feed?${limit(10, page)}`),
+  combinedFeed: page => {
+    return Promise.all([
+      requests.get(`/articles/feed?${limit(10, page)}`),
+      Promise.resolve().then(() => {
+        const topTags = getTopTags();
+        if (topTags.length === 0) return { articles: [] };
+        return Promise.all(topTags.map(tag => requests.get(`/articles?tag=${encode(tag)}&${limit(10, 0)}`))).then(results => {
+          const articles = [];
+          const seen = new Set();
+          results.forEach(result => {
+            result.articles.forEach(article => {
+              if (!seen.has(article.slug)) {
+                seen.add(article.slug);
+                articles.push({ ...article, isRecommended: true });
+              }
+            });
+          });
+          return { articles: articles.slice(0, 6) };
+        });
+      })
+    ]).then(([feedResult, recommendedResult]) => {
+      const seen = new Set();
+      const combined = [];
+      
+      recommendedResult.articles.forEach(article => {
+        seen.add(article.slug);
+        combined.push(article);
+      });
+      
+      feedResult.articles.forEach(article => {
+        if (!seen.has(article.slug)) {
+          combined.push(article);
+        }
+      });
+      
+      return { articles: combined.slice(0, 10), articlesCount: combined.length };
+    });
+  },
   byAuthor: (author, page) =>
     requests.get(`/articles?author=${encode(author)}&${limit(5, page)}`),
   byTag: (tag, page) =>
     requests.get(`/articles?tag=${encode(tag)}&${limit(10, page)}`),
+  search: (query) =>
+    requests.get(`/articles?search=${encode(query)}&${limit(10, 0)}`),
+  trending: (timeframe = 'week') =>
+    requests.get(`/articles/trending?timeframe=${timeframe}&${limit(10, 0)}`),
   del: slug =>
     requests.del(`/articles/${slug}`),
   favorite: slug =>
     requests.post(`/articles/${slug}/favorite`),
   favoritedBy: (author, page) =>
     requests.get(`/articles?favorited=${encode(author)}&${limit(5, page)}`),
-  feed: () =>
-    requests.get('/articles/feed?limit=10&offset=0'),
   get: slug =>
     requests.get(`/articles/${slug}`),
   unfavorite: slug =>
@@ -65,7 +110,15 @@ const Articles = {
   update: article =>
     requests.put(`/articles/${article.slug}`, { article: omitSlug(article) }),
   create: article =>
-    requests.post('/articles', { article })
+    requests.post('/articles', { article }),
+  bookmark: slug =>
+    requests.post(`/articles/${slug}/bookmark`),
+  unbookmark: slug =>
+    requests.del(`/articles/${slug}/bookmark`)
+};
+
+const Bookmarks = {
+  getAll: () => requests.get('/bookmarks')
 };
 
 const Comments = {
@@ -73,8 +126,14 @@ const Comments = {
     requests.post(`/articles/${slug}/comments`, { comment }),
   delete: (slug, commentId) =>
     requests.del(`/articles/${slug}/comments/${commentId}`),
+  update: (slug, commentId, body) =>
+    requests.put(`/articles/${slug}/comments/${commentId}`, { comment: { body } }),
   forArticle: slug =>
-    requests.get(`/articles/${slug}/comments`)
+    requests.get(`/articles/${slug}/comments`),
+  upvote: (commentId) =>
+    requests.post(`/comments/${commentId}/vote`, { value: 1 }),
+  downvote: (commentId) =>
+    requests.post(`/comments/${commentId}/vote`, { value: -1 })
 };
 
 const Profile = {
@@ -83,14 +142,35 @@ const Profile = {
   get: username =>
     requests.get(`/profiles/${username}`),
   unfollow: username =>
-    requests.del(`/profiles/${username}/follow`)
+    requests.del(`/profiles/${username}/follow`),
+  block: username =>
+    requests.post(`/profiles/${username}/block`),
+  unblock: username =>
+    requests.del(`/profiles/${username}/block`),
+  getAllUsers: () =>
+    requests.get('/profiles')
+};
+
+const Notifications = {
+  getAll: () =>
+    requests.get('/notifications'),
+  markRead: (id) =>
+    requests.put(`/notifications/${id}/read`, {})
+};
+
+const Moderation = {
+  report: (data) =>
+    requests.post('/moderation/report', data)
 };
 
 export default {
   Articles,
   Auth,
+  Bookmarks,
   Comments,
   Profile,
   Tags,
+  Notifications,
+  Moderation,
   setToken: _token => { token = _token; }
 };

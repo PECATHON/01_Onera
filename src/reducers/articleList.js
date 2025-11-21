@@ -1,6 +1,8 @@
 import {
   ARTICLE_FAVORITED,
   ARTICLE_UNFAVORITED,
+  ARTICLE_BOOKMARKED,
+  ARTICLE_UNBOOKMARKED,
   SET_PAGE,
   APPLY_TAG_FILTER,
   HOME_PAGE_LOADED,
@@ -16,6 +18,9 @@ export default (state = {}, action) => {
   switch (action.type) {
     case ARTICLE_FAVORITED:
     case ARTICLE_UNFAVORITED:
+      if (!state.articles) {
+        return state;
+      }
       return {
         ...state,
         articles: state.articles.map(article => {
@@ -24,6 +29,23 @@ export default (state = {}, action) => {
               ...article,
               favorited: action.payload.article.favorited,
               favoritesCount: action.payload.article.favoritesCount
+            };
+          }
+          return article;
+        })
+      };
+    case ARTICLE_BOOKMARKED:
+    case ARTICLE_UNBOOKMARKED:
+      if (!state.articles || !action.payload || !action.payload.article) {
+        return state;
+      }
+      return {
+        ...state,
+        articles: state.articles.map(article => {
+          if (article.slug === action.payload.article.slug) {
+            return {
+              ...article,
+              bookmarked: action.payload.article.bookmarked
             };
           }
           return article;
@@ -50,9 +72,9 @@ export default (state = {}, action) => {
       return {
         ...state,
         pager: action.pager,
-        tags: action.payload[0].tags,
-        articles: action.payload[1].articles,
-        articlesCount: action.payload[1].articlesCount,
+        tags: action.payload && action.payload[0] ? action.payload[0].tags : [],
+        articles: action.payload && action.payload[1] ? action.payload[1].articles : [],
+        articlesCount: action.payload && action.payload[1] ? action.payload[1].articlesCount : 0,
         currentPage: 0,
         tab: action.tab
       };
