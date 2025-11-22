@@ -260,6 +260,10 @@ class Profile extends React.Component {
               font-size: 0.85rem;
             }
 
+            .articles-toggle {
+              margin-bottom: 1.5rem;
+            }
+
             .col-md-10 {
               width: 100% !important;
               margin-left: 0 !important;

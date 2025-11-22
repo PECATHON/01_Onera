@@ -53,18 +53,24 @@ class Tags extends React.Component {
     if (tags && tags.length > 0) {
       return (
         <div className="tag-list">
+          <style>{`
+            .tag-active {
+              background-color: #5cb85c !important;
+              color: white !important;
+              border-color: #5cb85c !important;
+            }
+            .tag-active:hover {
+              background-color: #4a9a4a !important;
+              border-color: #4a9a4a !important;
+            }
+          `}</style>
           {
             tags.map(tag => {
               const isActive = selectedTags.includes(tag);
               return (
                 <button
-                  className={`tag-default tag-pill ${isActive ? 'active' : ''}`}
+                  className={`tag-default tag-pill ${isActive ? 'tag-active' : ''}`}
                   key={tag}
-                  style={isActive ? {
-                    backgroundColor: '#5cb85c !important',
-                    color: 'white !important',
-                    borderColor: '#5cb85c !important'
-                  } : {}}
                   onClick={(ev) => this.handleTagClick(ev, tag)}>
                   {tag}
                 </button>

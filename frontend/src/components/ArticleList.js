@@ -17,7 +17,7 @@ const ArticleList = props => {
   }
 
   return (
-    <div style={{ marginLeft: '-1.5rem', marginRight: '-1.5rem' }}>
+    <div style={{ marginLeft: '-1.5rem', marginTop: '1.5rem', marginRight: '-1.5rem' }}>
       {
         props.articles.map(article => {
           return (

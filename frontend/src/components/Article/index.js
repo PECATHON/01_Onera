@@ -85,14 +85,6 @@ class Article extends React.Component {
             </div>
           </div>
 
-          <hr />
-
-          <div className="article-actions">
-            <ArticleMeta
-              article={this.props.article}
-              canModify={canModify} />
-          </div>
-
           <div className="row">
             <CommentContainer
               comments={this.props.comments || []}
