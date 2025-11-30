@@ -4,7 +4,7 @@ import { getTopTags } from './utils/readingHistory';
 
 const superagent = superagentPromise(_superagent, global.Promise);
 
-const API_ROOT = 'http://localhost:3000/api';
+const API_ROOT = process.env.REACT_APP_API_URL || 'https://conduitbackend-production.up.railway.app/api';
 
 const encode = encodeURIComponent;
 const responseBody = res => res.body;
@@ -74,18 +74,23 @@ const Articles = {
     ]).then(([feedResult, recommendedResult]) => {
       const seen = new Set();
       const combined = [];
-      
+
       recommendedResult.articles.forEach(article => {
         seen.add(article.slug);
         combined.push(article);
       });
-      
+
       feedResult.articles.forEach(article => {
         if (!seen.has(article.slug)) {
           combined.push(article);
         }
       });
-      
+
+      // If no articles from feed or recommendations, get global articles
+      if (combined.length === 0) {
+        return requests.get(`/articles?${limit(10, page)}`);
+      }
+
       return { articles: combined.slice(0, 10), articlesCount: combined.length };
     });
   },
@@ -133,7 +138,9 @@ const Comments = {
   upvote: (commentId) =>
     requests.post(`/comments/${commentId}/vote`, { value: 1 }),
   downvote: (commentId) =>
-    requests.post(`/comments/${commentId}/vote`, { value: -1 })
+    requests.post(`/comments/${commentId}/vote`, { value: -1 }),
+  byAuthor: (username) =>
+    Profile.getComments(username)
 };
 
 const Profile = {
@@ -156,12 +163,12 @@ const Profile = {
         if (!articlesResponse.articles || articlesResponse.articles.length === 0) {
           return { comments: [] };
         }
-        
+
         // Get comments from all recent articles and filter by username
-        const commentPromises = articlesResponse.articles.map(article => 
+        const commentPromises = articlesResponse.articles.map(article =>
           requests.get(`/articles/${article.slug}/comments`)
-            .then(commentsResponse => 
-              (commentsResponse.comments || []).filter(comment => 
+            .then(commentsResponse =>
+              (commentsResponse.comments || []).filter(comment =>
                 comment.author.username === username
               ).map(comment => ({
                 ...comment,
@@ -173,7 +180,7 @@ const Profile = {
             )
             .catch(() => [])
         );
-        
+
         return Promise.all(commentPromises)
           .then(commentArrays => {
             const allComments = commentArrays.flat()
