@@ -159,6 +159,7 @@ class Editor extends React.Component {
                   value={this.props.tagInput}
                   onChange={this.changeTagInput}
                   onKeyUp={this.watchForEnter} />
+                <div className="tag-help-text">Press Enter to add a tag</div>
 
                 <div className="tag-list">
                   {(this.props.tagList || []).map(tag => {
@@ -304,32 +305,35 @@ class Editor extends React.Component {
               float: none !important;
             }
           }
+
           .editor-tabs {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 0;
             border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
           }
 
           .editor-tab {
             background: none;
             border: none;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            font-weight: 500;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
-            border-bottom: 2px solid transparent;
+            border-radius: 6px;
             transition: all 0.2s;
           }
 
           .editor-tab:hover {
+            background: var(--bg-hover);
             color: var(--primary);
           }
 
           .editor-tab.active {
+            background: var(--bg-hover);
             color: var(--primary);
-            border-bottom-color: var(--primary);
           }
 
           .markdown-preview {
@@ -340,6 +344,44 @@ class Editor extends React.Component {
             background: var(--bg-body);
             color: var(--text-main);
             overflow-y: auto;
+            line-height: 1.6;
+          }
+
+          .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+          }
+
+          .markdown-preview p {
+            margin-bottom: 1rem;
+          }
+
+          .markdown-preview ul, .markdown-preview ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+          }
+
+          .markdown-preview code {
+            background: var(--bg-hover);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+
+          .markdown-preview pre {
+            background: var(--bg-hover);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+          }
+
+          .tag-help-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            margin-left: 0.25rem;
           }
         `}</style>
       </div>
